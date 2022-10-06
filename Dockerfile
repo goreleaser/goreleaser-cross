@@ -26,6 +26,7 @@ RUN \
         automake \
         bc \
         python \
+        jq \
         binfmt-support \
         binutils-multiarch \
         build-essential \

@@ -17,23 +17,16 @@ if [[ -z "$DOCKER_CREDS_FILE" ]]; then
 	DOCKER_CREDS_FILE=/secrets/.docker-creds
 fi
 
-function docker-login() {
-	if ! echo "$2" | docker login "$3" --username "$1" --password-stdin ; then
-		if [[ $DOCKER_FAIL_ON_LOGIN_ERROR == "true" ]]; then
-			exit 1
-		fi
-	fi
-}
-
 if [[ -f $DOCKER_CREDS_FILE ]]; then
-	IFS=':'
-	while read -r user password registry; do
-		echo "$user" "$password" "$registry"
-		docker-login "$user" "$password" "$registry"
-	done <$DOCKER_CREDS_FILE
-else
-	if [[ -n "${DOCKER_USERNAME}" ]]; then
-		docker-login "${DOCKER_USERNAME}" "${DOCKER_PASSWORD}" "$DOCKER_HOST"
+	if cat "$DOCKER_CREDS_FILE" | jq 2>&1 >/dev/null ; then
+		while read user pass registry ; do
+			echo "$pass" | docker login --username "$user" --password-stdin "$registry"
+		done <<< $(cat "$DOCKER_CREDS_FILE" | jq -Mr '.registries[] | [.user, .pass, .registry] | @tsv')
+	else
+		IFS=':'
+			while read -r user pass registry; do
+				echo "$pass" | docker login -u "$user" --password-stdin "$registry"
+			done <$DOCKER_CREDS_FILE
 	fi
 fi
 
