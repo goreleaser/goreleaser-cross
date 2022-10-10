@@ -12,7 +12,7 @@ This project is rather cookbook combing various projects into one. Special to [o
 
 ## Docker
 
-Docker images are available on both [Github](https://ghcr.io/goreleaser/goreleaser-cross) and [Docker hub](https://hub.docker.com/r/goreleaser/goreleaser-cross).
+Docker images are available on both [GitHub](https://ghcr.io/goreleaser/goreleaser-cross) and [Docker hub](https://hub.docker.com/r/goreleaser/goreleaser-cross).
 
 Images from version v1.17.4 are multi-arch. Supported host are listed in the table below
 
@@ -23,13 +23,13 @@ Images from version v1.17.4 are multi-arch. Supported host are listed in the tab
 
 To run build with CGO each entry requires some environment variables
 
-| Env variable           | value                                          |            required            | Notes                                                                                              |
-|------------------------|------------------------------------------------|:------------------------------:|----------------------------------------------------------------------------------------------------|
-| CGO_ENABLED            | 1                                              |              Yes               | instead of specifying it in each build it can be set globally during docker run `-e CGO_ENABLED=1` |
-| CC                     | [see targets](#supported-toolchains/platforms) |            Optional            |
-| CXX                    | [see targets](#supported-toolchains/platforms) |            Optional            |
-| PKG_CONFIG_SYSROOT_DIR |                                                | Required if sysroot is present |
-| PKG_CONFIG_PATH        |                                                |            Optional            | List of directories containing pkg-config files                                                    |
+| Env variable             | value                                          |            required            | Notes                                                                                              |
+|--------------------------|------------------------------------------------|:------------------------------:|----------------------------------------------------------------------------------------------------|
+| `CGO_ENABLED`            | 1                                              |              Yes               | instead of specifying it in each build it can be set globally during docker run `-e CGO_ENABLED=1` |
+| `CC`                     | [see targets](#supported-toolchains/platforms) |            Optional            |
+| `CXX`                    | [see targets](#supported-toolchains/platforms) |            Optional            |
+| `PKG_CONFIG_SYSROOT_DIR` |                                                | Required if sysroot is present |
+| `PKG_CONFIG_PATH`        |                                                |            Optional            | List of directories containing pkg-config files                                                    |
 
 - **PKG_CONFIG_SYSROOT_DIR** modifies `-I`  and `-L` to use the directories located in target's sysroot.
 - The value of `PKG_CONFIG_SYSROOT_DIR` is prefixed to `-I` and `-L`. For instance `-I/usr/include/libfoo` becomes `-I/var/target/usr/include/libfoo`
@@ -38,33 +38,46 @@ with a `PKG_CONFIG_SYSROOT_DIR` set to `/var/target` (same rule apply to `-L`)
 
 ## Supported toolchains/platforms
 
-| Platform    | Arch            | CC                      | CXX                     |       Verified        |
-|-------------|-----------------|-------------------------|-------------------------|:---------------------:|
-| Darwin      | amd64           | o64-clang               | o64-clang++             |           ✅          |
-| Darwin (M1) | arm64           | oa64-clang              | oa64-clang++            |           ✅          |
-| Linux       | amd64           | gcc                     | g++                     |           ✅          |
-| Linux       | arm64           | aarch64-linux-gnu-gcc   | aarch64-linux-gnu-g++   |           ✅          |
-| Linux       | armhf (GOARM=5) | arm-linux-gnueabihf-gcc | arm-linux-gnueabihf-g++ | Verification required |
-| Linux       | armhf (GOARM=6) | arm-linux-gnueabihf-gcc | arm-linux-gnueabihf-g++ | Verification required |
-| Linux       | armhf (GOARM=7) | arm-linux-gnueabihf-gcc | arm-linux-gnueabihf-g++ |           ✅          |
-| Windows     | amd64           | x86_64-w64-mingw32-gcc  | x86_64-w64-mingw32-g++  |           ✅          |
-| Windows     | arm64           | /llvm-mingw/llvm-mingw/bin/aarch64-w64-mingw32-gcc | /llvm-mingw/llvm-mingw/bin/aarch64-w64-mingw32-g++ |          ✅           |
+| Platform    | Arch            | CC                                                 | CXX                                                |       Verified        |
+|-------------|-----------------|----------------------------------------------------|----------------------------------------------------|:---------------------:|
+| Darwin      | amd64           | o64-clang                                          | o64-clang++                                        |           ✅           |
+| Darwin (M1) | arm64           | oa64-clang                                         | oa64-clang++                                       |           ✅           |
+| Linux       | amd64           | gcc                                                | g++                                                |           ✅           |
+| Linux       | arm64           | aarch64-linux-gnu-gcc                              | aarch64-linux-gnu-g++                              |           ✅           |
+| Linux       | armhf (GOARM=5) | arm-linux-gnueabihf-gcc                            | arm-linux-gnueabihf-g++                            | Verification required |
+| Linux       | armhf (GOARM=6) | arm-linux-gnueabihf-gcc                            | arm-linux-gnueabihf-g++                            | Verification required |
+| Linux       | armhf (GOARM=7) | arm-linux-gnueabihf-gcc                            | arm-linux-gnueabihf-g++                            |           ✅           |
+| Windows     | amd64           | x86_64-w64-mingw32-gcc                             | x86_64-w64-mingw32-g++                             |           ✅           |
+| Windows     | arm64           | /llvm-mingw/llvm-mingw/bin/aarch64-w64-mingw32-gcc | /llvm-mingw/llvm-mingw/bin/aarch64-w64-mingw32-g++ |           ✅           |
 
 ## Docker
 
 ### Environment variables
+- [Goreleaser](https://github.com/goreleaser/goreleaser) variables
+- `GPG_KEY` (optional) - defaults to /secrets/key.gpg. ignored if file not found
+- `DOCKER_CREDS_FILE` (optional) - path to JSON file with docker login credentials. useful when push to multiple docker registries required
+- `DOCKER_FAIL_ON_LOGIN_ERROR` (optional) - fail on docker login error
 
-- GPG_KEY - defaults to /secrets/key.gpg. ignored if file not found
-- DOCKER_USERNAME
-- DOCKER_PASSWORD
-- DOCKER_HOST - defaults to `hub.docker.io`. ignored if `DOCKER_USERNAME` and `DOCKER_PASSWORD` are empty or `DOCKER_CREDS_FILE` is present
-- DOCKER_CREDS_FILE - path to file with docker login credentials in colon separated format `user:password:<registry>`. useful when push to multiple docker registries required
-    ```
-    user1:password1:hub.docker.io
-    user2:password2:registry.gitlab.com
-    ```
-- DOCKER_FAIL_ON_LOGIN_ERROR - fail on docker login error
-- GITHUB_TOKEN - github auth token to deploy release
+### Login to registry
+#### Github Actions
+Use [docker login](https://github.com/docker/login-action) to auth to repos and mount docker config file. For example
+```shell
+docker run -v $(HOME)/.docker/config.json:/root/.docker/config.json ...
+```
+
+#### Docker creds file
+To login from within `goreleaser-cross` container create creds file. 
+```json
+{
+	"registries": [
+		{
+			"user" : "<username>",
+			"pass" : "<password>",
+			"registry" : "<registry url>" // for example ghcr.io
+		}
+	]
+}
+```
 
 ## Sysroot howto
 
