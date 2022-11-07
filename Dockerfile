@@ -48,6 +48,7 @@ RUN \
         patch \
         mercurial \
         musl-tools \
+        upx-ucl \
  && apt -y autoremove \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* \
