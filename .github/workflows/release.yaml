@@ -3,6 +3,9 @@ on:
   push:
     tags:
       - v*
+    branches:
+      - master
+
 env:
   GO111MODULE: on
 jobs:
@@ -10,13 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to DockerHub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -31,26 +34,26 @@ jobs:
         shell: bash
         id: meta
         run: |
-          export cross_tags="$(./scripts/image-tags.sh cross)"
-          export cross_base_tags="$(./scripts/image-tags.sh cross-base)"
+          cross_tags="$(./scripts/image-tags.sh cross)"
+          cross_base_tags="$(./scripts/image-tags.sh cross-base)"
 
-          cross_tags="${cross_tags//'%'/'%25'}"
-          cross_tags="${cross_tags//$'\n'/'%0A'}"
-          cross_tags="${cross_tags//$'\r'/'%0D'}"
+          echo 'cross_tags<<EOF' >> $GITHUB_OUTPUT
+          echo "$cross_tags" >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
 
-          cross_base_tags="${cross_base_tags//'%'/'%25'}"
-          cross_base_tags="${cross_base_tags//$'\n'/'%0A'}"
-          cross_base_tags="${cross_base_tags//$'\r'/'%0D'}"
-
-          echo "::set-output name=cross_tags::$cross_tags"
-          echo "::set-output name=cross_base_tags::$cross_base_tags"
+          echo 'cross_base_tags<<EOF' >> $GITHUB_OUTPUT
+          echo "$cross_base_tags" >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+      - name: Set docker push behavior
+        uses: tj-actions/branch-names@v6
+        id: branch-name
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Install cosign
-        uses: sigstore/cosign-installer@v2.5.0
-      - uses: actions/setup-go@v2
+        uses: sigstore/cosign-installer@main
+      - uses: actions/setup-go@v3
         with:
           go-version: "${{ env.GO_VERSION }}"
       - name: Install git-chglog
@@ -60,7 +63,7 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          push: true
+          push: ${{ steps.branch-name.outputs.is_tag }}
           file: Dockerfile.base
           tags: ${{ steps.meta.outputs.cross_base_tags }}
           build-args: |
@@ -75,7 +78,7 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          push: true
+          push: ${{ steps.branch-name.outputs.is_tag }}
           tags: ${{ steps.meta.outputs.cross_tags }}
           build-args: |
             "GO_VERSION=${{env.GO_VERSION}}"
@@ -84,16 +87,30 @@ jobs:
             "OSX_VERSION_MIN=${{env.OSX_VERSION_MIN}}"
             "OSX_CROSS_COMMIT=${{env.OSX_CROSS_COMMIT}}"
             "DEBIAN_FRONTEND=${{env.DEBIAN_FRONTEND}}"
-#      - name: Sign images
-#        run: |
-#          echo "${COSIGN_KEY}" | base64 -d > /tmp/cosign.key
-#          cosign sign --key /tmp/cosign.key ghcr.io/goreleaser/goreleaser-cross:${{env.RELEASE_TAG}}
-#        env:
-#          COSIGN_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
-#          COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}
-      - name: Generate changelog
+      - name: Sign images
+        if: ${{ steps.branch-name.outputs.is_tag }}
+        run: |
+          while IFS=$'\n' read -r line; do
+              base_name=$(echo "$line" | cut -d ":" -f 1)
+              id=$(docker image inspect "$line" --format='{{.Id}}')
+
+              cosign sign --upload=${{ steps.branch-name.outputs.is_tag }} --key env://COSIGN_PRIVATE_KEY --recursive $base_name@$id
+          done <<< "${{ steps.meta.outputs.cross_base_tags }}"
+
+          while IFS=$'\n' read -r line; do
+              base_name=$(echo "$line" | cut -d ":" -f 1)
+              id=$(docker image inspect "$line" --format='{{.Id}}')
+
+              cosign sign --upload=${{ steps.branch-name.outputs.is_tag }} --key env://COSIGN_PRIVATE_KEY --recursive $base_name@$id
+          done <<< "${{ steps.meta.outputs.cross_tags }}"
+        env:
+          COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
+          COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}
+      - if: ${{ steps.branch-name.outputs.is_tag }}
+        name: Generate changelog
         run: make gen-changelog
-      - name: Release
+      - if: ${{ steps.branch-name.outputs.is_tag }}
+        name: Release
         uses: softprops/action-gh-release@v1
         with:
           body_path: changelog.md
