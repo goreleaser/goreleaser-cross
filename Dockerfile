@@ -10,7 +10,6 @@ SHELL ["/bin/bash", "-c"]
 RUN \
     set -x; \
     echo "Starting image build for Debian" \
- && dpkgArch="$(dpkg --print-architecture)" \
  && dpkg --add-architecture amd64 \
  && dpkg --add-architecture arm64 \
  && dpkg --add-architecture armel \
@@ -20,6 +19,7 @@ RUN \
  && dpkg --add-architecture mipsel \
  && dpkg --add-architecture powerpc \
  && dpkg --add-architecture ppc64el \
+ && dpkg --add-architecture s390x \
  && apt-get update \
  && apt-get install --no-install-recommends -y -q \
         autoconf \
@@ -33,6 +33,7 @@ RUN \
         clang \
         gcc \
         g++ \
+        libarchive-tools \
         gdb \
         mingw-w64 \
         crossbuild-essential-amd64 \
@@ -41,6 +42,7 @@ RUN \
         crossbuild-essential-armhf \
         crossbuild-essential-mipsel \
         crossbuild-essential-ppc64el \
+        crossbuild-essential-s390x \
         devscripts \
         libtool \
         llvm \
@@ -57,13 +59,13 @@ RUN \
     /usr/share/doc
 
 # install a copy of mingw with aarch64 support to enable windows on arm64
-WORKDIR /llvm-mingw
 ARG TARGETARCH
+ARG MINGW_VERSION=20220906
+
 RUN \
-    if [ ${TARGETARCH} = "arm64" ]; then MINGW_ARCH=aarch64; else MINGW_ARCH=x86_64; fi && \
-    wget "https://github.com/mstorsjo/llvm-mingw/releases/download/20220906/llvm-mingw-20220906-ucrt-ubuntu-18.04-${MINGW_ARCH}.tar.xz" && \
-    tar -xvf llvm-mingw-20220906-ucrt-ubuntu-18.04-${MINGW_ARCH}.tar.xz && \
-    ln -s llvm-mingw-20220906-ucrt-ubuntu-18.04-${MINGW_ARCH} llvm-mingw
+    if [ ${TARGETARCH} = "arm64" ]; then MINGW_ARCH=aarch64; elif [ ${TARGETARCH} = "amd64" ]; then MINGW_ARCH=x86_64; else echo "unsupported TARGETARCH=${TARGETARCH}"; exit 1; fi \
+ && wget -qO - "https://github.com/mstorsjo/llvm-mingw/releases/download/${MINGW_VERSION}/llvm-mingw-${MINGW_VERSION}-ucrt-ubuntu-18.04-${MINGW_ARCH}.tar.xz" | bsdtar -xf - \
+ && ln -s llvm-mingw-20220906-ucrt-ubuntu-18.04-${MINGW_ARCH} llvm-mingw
 
 FROM osx-cross-base AS osx-cross
 ARG OSX_CROSS_COMMIT
@@ -107,6 +109,7 @@ RUN \
  && UNATTENDED=1 OSX_VERSION_MIN=${OSX_VERSION_MIN} ./build.sh
 
 FROM osx-cross-base AS final
+
 LABEL maintainer="Artur Troian <troian dot ap at gmail dot com>"
 LABEL "org.opencontainers.image.source"="https://github.com/goreleaser/goreleaser-cross"
 
