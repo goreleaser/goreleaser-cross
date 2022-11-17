@@ -12,6 +12,7 @@ ARG TINI_VERSION
 ARG COSIGN_VERSION
 ARG COSIGN_SHA256
 ARG GORELEASER_DOWNLOAD_URL=https://github.com/goreleaser/goreleaser/releases/download/v${GORELEASER_VERSION}
+ARG TARGETARCH
 
 # install cosign
 COPY --from=gcr.io/projectsigstore/cosign:v1.13.1.1@sha256:fd5b09be23ef1027e1bdd490ce78dcc65d2b15902e1f4ba8e04f3b4019cc1057 /ko-app/cosign /usr/local/bin/cosign
@@ -20,9 +21,6 @@ COPY entrypoint.sh /
 # Install deps
 RUN \
     set -x \
- && dpkgArch="$(dpkg --print-architecture)" \
- && curl --fail -sSL -o /tini https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-$dpkgArch \
- && chmod +x /tini \
  && echo "Starting image build for Debian" \
  && sed -ri "s/(httpredir|deb).debian.org/${APT_MIRROR:-deb.debian.org}/g" /etc/apt/sources.list \
  && sed -ri "s/(security).debian.org/${APT_MIRROR:-security.debian.org}/g" /etc/apt/sources.list \
@@ -30,9 +28,10 @@ RUN \
  && apt-get install --no-install-recommends -y -q \
     software-properties-common \
  && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add - \
- && echo "deb [arch=$dpkgArch] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list \
+ && echo "deb [arch=$TARGETARCH] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list \
  && apt-get update \
  && apt-get install --no-install-recommends -y -q \
+        tini \
         docker-ce \
         docker-ce-cli \
         make \
@@ -44,7 +43,7 @@ RUN \
  && apt -y autoremove \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
- && GORELEASER_DOWNLOAD_FILE=goreleaser_${GORELEASER_VERSION}_${dpkgArch}.deb \
+ && GORELEASER_DOWNLOAD_FILE=goreleaser_${GORELEASER_VERSION}_${TARGETARCH}.deb \
  && GORELEASER_DOWNLOAD_DEB="${GORELEASER_DOWNLOAD_URL}/${GORELEASER_DOWNLOAD_FILE}" \
  && wget https://github.com/goreleaser/goreleaser/releases/download/v${GORELEASER_VERSION}/checksums.txt.pem \
  && COSIGN_EXPERIMENTAL=1 cosign verify-blob --cert checksums.txt.pem --signature "${GORELEASER_DOWNLOAD_URL}/checksums.txt.sig" "${GORELEASER_DOWNLOAD_URL}/checksums.txt" \
@@ -53,4 +52,4 @@ RUN \
  && rm ${GORELEASER_DOWNLOAD_FILE} \
  && chmod +x /entrypoint.sh
 
-ENTRYPOINT ["/tini", "--", "/entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/entrypoint.sh"]
