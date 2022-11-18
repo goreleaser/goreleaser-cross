@@ -8,7 +8,7 @@ Should you wish to see working [examples](#examples) instead of reading
 
 ## Credits
 
-This project is rather cookbook combing various projects into one. Special to [osxcross](https://github.com/tpoechtrager/osxcross) for amazing cross-compile environment for OSX.
+This project is a cookbook combining various projects into one. Special thanks to [osxcross](https://github.com/tpoechtrager/osxcross) for an amazing cross-compile environment for OSX.
 
 ## Docker
 
@@ -18,17 +18,16 @@ Images from version v1.17.4 are multi-arch. Supported hosts are listed in the ta
 
 | Host                | Supported | `gcc` compiler        | `g++` compiler        |
 | ------------------- | :-------: | --------------------- | --------------------- |
-| amd64               |    ✅     | x86_64-linux-gnu-gcc  | x86_64-linux-gnu-g++  |
-| arm64 (aka aarch64) |    ✅     | aarch64-linux-gnu-gcc | aarch64-linux-gnu-gcc |
+| amd64               |     ✅     | x86_64-linux-gnu-gcc  | x86_64-linux-gnu-g++  |
+| arm64 (aka aarch64) |     ✅     | aarch64-linux-gnu-gcc | aarch64-linux-gnu-gcc |
 
-To run build with CGO each entry requires some environment variables
-
-| Env variable             | value                                          |            required            | Notes                                                                                              |
+Below are additional environment variables to set when cross compiling with CGO.
+| Env variable             | Value                                          |            Required            | Notes                                                                                              |
 | ------------------------ | ---------------------------------------------- | :----------------------------: | -------------------------------------------------------------------------------------------------- |
-| `CGO_ENABLED`            | 1                                              |              Yes               | instead of specifying it in each build it can be set globally during docker run `-e CGO_ENABLED=1` |
-| `CC`                     | [see targets](#supported-toolchains/platforms) |            Optional            |
-| `CXX`                    | [see targets](#supported-toolchains/platforms) |            Optional            |
-| `PKG_CONFIG_SYSROOT_DIR` |                                                | Required if sysroot is present |
+| `CGO_ENABLED`            | 1                                              |              Yes               | Instead of specifying it in each build it can be set globally during docker run `-e CGO_ENABLED=1` |
+| `CC`                     | [see targets](#supported-toolchains/platforms) |            Optional            |                                                                                                    |
+| `CXX`                    | [see targets](#supported-toolchains/platforms) |            Optional            |                                                                                                    |
+| `PKG_CONFIG_SYSROOT_DIR` |                                                | Required if sysroot is present |                                                                                                    |
 | `PKG_CONFIG_PATH`        |                                                |            Optional            | List of directories containing pkg-config files                                                    |
 
 - **PKG_CONFIG_SYSROOT_DIR** modifies `-I` and `-L` to use the directories located in target's sysroot.
@@ -40,15 +39,15 @@ To run build with CGO each entry requires some environment variables
 
 | Platform    | Arch            | CC                                                 | CXX                                                |       Verified        |
 | ----------- | --------------- | -------------------------------------------------- | -------------------------------------------------- | :-------------------: |
-| Darwin      | amd64           | o64-clang                                          | o64-clang++                                        |          ✅           |
-| Darwin (M1) | arm64           | oa64-clang                                         | oa64-clang++                                       |          ✅           |
-| Linux       | amd64           | x86_64-linux-gnu-gcc                               | x86_64-linux-gnu-g++                               |          ✅           |
-| Linux       | arm64           | aarch64-linux-gnu-gcc                              | aarch64-linux-gnu-g++                              |          ✅           |
+| Darwin      | amd64           | o64-clang                                          | o64-clang++                                        |           ✅           |
+| Darwin (M1) | arm64           | oa64-clang                                         | oa64-clang++                                       |           ✅           |
+| Linux       | amd64           | x86_64-linux-gnu-gcc                               | x86_64-linux-gnu-g++                               |           ✅           |
+| Linux       | arm64           | aarch64-linux-gnu-gcc                              | aarch64-linux-gnu-g++                              |           ✅           |
 | Linux       | armhf (GOARM=5) | arm-linux-gnueabihf-gcc                            | arm-linux-gnueabihf-g++                            | Verification required |
 | Linux       | armhf (GOARM=6) | arm-linux-gnueabihf-gcc                            | arm-linux-gnueabihf-g++                            | Verification required |
-| Linux       | armhf (GOARM=7) | arm-linux-gnueabihf-gcc                            | arm-linux-gnueabihf-g++                            |          ✅           |
-| Windows     | amd64           | x86_64-w64-mingw32-gcc                             | x86_64-w64-mingw32-g++                             |          ✅           |
-| Windows     | arm64           | /llvm-mingw/llvm-mingw/bin/aarch64-w64-mingw32-gcc | /llvm-mingw/llvm-mingw/bin/aarch64-w64-mingw32-g++ |          ✅           |
+| Linux       | armhf (GOARM=7) | arm-linux-gnueabihf-gcc                            | arm-linux-gnueabihf-g++                            |           ✅           |
+| Windows     | amd64           | x86_64-w64-mingw32-gcc                             | x86_64-w64-mingw32-g++                             |           ✅           |
+| Windows     | arm64           | /llvm-mingw/llvm-mingw/bin/aarch64-w64-mingw32-gcc | /llvm-mingw/llvm-mingw/bin/aarch64-w64-mingw32-g++ |           ✅           |
 
 ## Docker
 
@@ -56,20 +55,20 @@ To run build with CGO each entry requires some environment variables
 
 - [Goreleaser](https://github.com/goreleaser/goreleaser) variables
 - `GPG_KEY` (optional) - defaults to /secrets/key.gpg. ignored if file not found
-- `DOCKER_CREDS_FILE` (optional) - path to JSON file with docker login credentials. useful when push to multiple docker registries required
+- `DOCKER_CREDS_FILE` (optional) - path to JSON file with docker login credentials. Useful when push to multiple docker registries required
 - `DOCKER_FAIL_ON_LOGIN_ERROR` (optional) - fail on docker login error
 
 ### Login to registry
 
 #### Github Actions
 
-Use [docker login](https://github.com/docker/login-action) to auth to repos and mount docker config file. For example
+Use [docker login](https://github.com/docker/login-action) to auth to repos and mount docker config file. For example:
 
 ```shell
 docker run -v $(HOME)/.docker/config.json:/root/.docker/config.json ...
 ```
 
-#### Docker creds file
+#### Docker Creds file
 
 To login from within `goreleaser-cross` container create creds file.
 
