@@ -14,12 +14,12 @@ This project is rather cookbook combing various projects into one. Special to [o
 
 Docker images are available on both [GitHub](https://ghcr.io/goreleaser/goreleaser-cross) and [Docker hub](https://hub.docker.com/r/goreleaser/goreleaser-cross).
 
-Images from version v1.17.4 are multi-arch. Supported host are listed in the table below
+Images from version v1.17.4 are multi-arch. Supported hosts are listed in the table below. The `compiler` columns refer to what compiler arch you are using when you invoke the `gcc` and `g++` binaries on the host.
 
-| Host                 | Supported |
-|----------------------|:---------:|
-|  amd64               |     ✅     |
-|  arm64 (aka aarch64) |     ✅     |
+| Host                 | Supported | `gcc` compiler         | `g++` compiler        |
+|----------------------|:---------:| ---------------------- | ----------------------|
+|  amd64               |     ✅    |  x86_64-linux-gnu-gcc  | x86_64-linux-gnu-g++  |
+|  arm64 (aka aarch64) |     ✅    |  aarch64-linux-gnu-gcc | aarch64-linux-gnu-gcc |  
 
 To run build with CGO each entry requires some environment variables
 
@@ -42,7 +42,7 @@ with a `PKG_CONFIG_SYSROOT_DIR` set to `/var/target` (same rule apply to `-L`)
 |-------------|-----------------|----------------------------------------------------|----------------------------------------------------|:---------------------:|
 | Darwin      | amd64           | o64-clang                                          | o64-clang++                                        |           ✅           |
 | Darwin (M1) | arm64           | oa64-clang                                         | oa64-clang++                                       |           ✅           |
-| Linux       | amd64           | gcc                                                | g++                                                |           ✅           |
+| Linux       | amd64           | x86_64-linux-gnu-gcc                               | x86_64-linux-gnu-g++                               |           ✅           |
 | Linux       | arm64           | aarch64-linux-gnu-gcc                              | aarch64-linux-gnu-g++                              |           ✅           |
 | Linux       | armhf (GOARM=5) | arm-linux-gnueabihf-gcc                            | arm-linux-gnueabihf-g++                            | Verification required |
 | Linux       | armhf (GOARM=6) | arm-linux-gnueabihf-gcc                            | arm-linux-gnueabihf-g++                            | Verification required |
