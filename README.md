@@ -8,7 +8,7 @@ Should you wish to see working [examples](#examples) instead of reading
 
 ## Credits
 
-This project is a cookbook combining various projects into one. Special thanks to [osxcross](https://github.com/tpoechtrager/osxcross) for an amazing cross-compile environment for OSX.
+This project is rather a cookbook combining various projects into one. Special thanks to [osxcross](https://github.com/tpoechtrager/osxcross) for an amazing cross-compile environment for OSX.
 
 ## Docker
 
