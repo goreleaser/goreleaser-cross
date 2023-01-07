@@ -1,0 +1,48 @@
+name: goreleaser-bump
+
+on:
+  repository_dispatch:
+    types: goreleaser
+
+jobs:
+  bump-goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GORELEASER_PAT }}
+        persist-credentials: true
+    - run: git checkout master
+    - name: setup git config
+      run: |
+        git config --global user.name github-actions
+        git config --global user.email "github-actions@github.com"
+    - name: setup env
+      uses: c-py/action-dotenv-to-setenv@v3
+      with:
+        env-file: .env
+    - name: goreleaser version
+      run: |
+        GORELEASER_VER=${{ github.event.client_payload.tag }}
+        echo "GORELEASER_VER=${GORELEASER_VER#v}" >> $GITHUB_ENV
+    - name: set new version
+      run: |
+        sed -i -e "s/GORELEASER_VERSION=${{ env.GORELEASER_VERSION }}/GORELEASER_VERSION=${{ env.GORELEASER_VER }}/g" .env
+    - name: commit new version
+      run: |
+        git add .env
+        git commit -m "feat: bump goreleaser to v${{ env.GORELEASER_VER }}"
+    - uses: cb80/delrel@latest
+      with:
+        tag: v${{ env.GO_VERSION}}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: (re)add current GO tag onto latest master
+      run: |
+        git tag -d v${{ env.GO_VERSION}} || true
+        git push origin :refs/tags/v${{ env.GO_VERSION}} || true
+
+        git tag -a v${{ env.GO_VERSION}} -m v${{ env.GO_VERSION}}
+        git push origin master v${{ env.GO_VERSION}}
