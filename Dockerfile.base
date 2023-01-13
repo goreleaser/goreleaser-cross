@@ -1,18 +1,19 @@
 # golang parameters
 ARG GO_VERSION
 
-FROM golang:${GO_VERSION}-bullseye
+FROM golang:"${GO_VERSION}-bullseye"
 LABEL maintainer="Artur Troian <troian dot ap at gmail dot com>"
-LABEL "org.opencontainers.image.source"="https://github.com/goreleaser/goreleaser-cross-base"
+LABEL org.opencontainers.image.source="https://github.com/goreleaser/goreleaser-cross-base"
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG GORELEASER_VERSION
 ARG APT_MIRROR
 ARG TINI_VERSION
 ARG COSIGN_VERSION
 ARG COSIGN_SHA256
-ARG GORELEASER_DOWNLOAD_URL=https://github.com/goreleaser/goreleaser/releases/download/v${GORELEASER_VERSION}
 ARG TARGETARCH
+ARG GORELEASER_VERSION
+ARG GORELEASER_DISTRIBUTION
+ARG GORELEASER_DOWNLOAD_URL="https://github.com/goreleaser/goreleaser${GORELEASER_DISTRIBUTION}/releases/download/v${GORELEASER_VERSION}"
 
 # install cosign
 COPY --from=gcr.io/projectsigstore/cosign:v1.13.1.1@sha256:fd5b09be23ef1027e1bdd490ce78dcc65d2b15902e1f4ba8e04f3b4019cc1057 /ko-app/cosign /usr/local/bin/cosign
@@ -43,13 +44,14 @@ RUN \
  && apt -y autoremove \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
- && GORELEASER_DOWNLOAD_FILE=goreleaser_${GORELEASER_VERSION}_${TARGETARCH}.deb \
+ && GORELEASER_DOWNLOAD_FILE="goreleaser${GORELEASER_DISTRIBUTION}_${GORELEASER_VERSION}_${TARGETARCH}.deb" \
  && GORELEASER_DOWNLOAD_DEB="${GORELEASER_DOWNLOAD_URL}/${GORELEASER_DOWNLOAD_FILE}" \
- && wget https://github.com/goreleaser/goreleaser/releases/download/v${GORELEASER_VERSION}/checksums.txt.pem \
+ && wget "${GORELEASER_DOWNLOAD_URL}/checksums.txt.pem" \
  && COSIGN_EXPERIMENTAL=1 cosign verify-blob --cert checksums.txt.pem --signature "${GORELEASER_DOWNLOAD_URL}/checksums.txt.sig" "${GORELEASER_DOWNLOAD_URL}/checksums.txt" \
  && wget ${GORELEASER_DOWNLOAD_DEB} \
  && dpkg -i ${GORELEASER_DOWNLOAD_FILE} \
  && rm ${GORELEASER_DOWNLOAD_FILE} \
+ && rm checksums.txt.pem \
  && chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/entrypoint.sh"]
