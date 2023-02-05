@@ -1,55 +1,50 @@
-# golang parameters
-ARG GO_VERSION
+ARG COSIGN_VERSION
+ARG COSIGN_SHA256
+ARG TOOLCHAINS_VERSION
 
-FROM golang:${GO_VERSION}-bullseye
+FROM gcr.io/projectsigstore/cosign:v$COSIGN_VERSION@sha256:$COSIGN_SHA256 as cosign
+
+FROM ghcr.io/goreleaser/goreleaser-cross-toolchains:$TOOLCHAINS_VERSION
+
 LABEL maintainer="Artur Troian <troian dot ap at gmail dot com>"
 LABEL "org.opencontainers.image.source"="https://github.com/goreleaser/goreleaser-cross-base"
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG GORELEASER_VERSION
-ARG APT_MIRROR
 ARG TINI_VERSION
-ARG COSIGN_VERSION
-ARG COSIGN_SHA256
-ARG GORELEASER_DOWNLOAD_URL=https://github.com/goreleaser/goreleaser/releases/download/v${GORELEASER_VERSION}
+ARG GO_VERSION
 ARG TARGETARCH
 
-# install cosign
-COPY --from=gcr.io/projectsigstore/cosign:v1.13.1.1@sha256:fd5b09be23ef1027e1bdd490ce78dcc65d2b15902e1f4ba8e04f3b4019cc1057 /ko-app/cosign /usr/local/bin/cosign
 COPY entrypoint.sh /
 
 # Install deps
 RUN \
-    set -x \
- && echo "Starting image build for Debian" \
+    echo "Starting image build for Debian" \
  && sed -ri "s/(httpredir|deb).debian.org/${APT_MIRROR:-deb.debian.org}/g" /etc/apt/sources.list \
  && sed -ri "s/(security).debian.org/${APT_MIRROR:-security.debian.org}/g" /etc/apt/sources.list \
  && apt-get update \
  && apt-get install --no-install-recommends -y -q \
     software-properties-common \
+    curl \
+    gnupg2 \
  && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add - \
  && echo "deb [arch=$TARGETARCH] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list \
  && apt-get update \
  && apt-get install --no-install-recommends -y -q \
-        tini \
         docker-ce \
         docker-ce-cli \
-        make \
-        git-core \
-        wget \
-        xz-utils \
-        cmake \
-        openssl \
+        tini \
  && apt -y autoremove \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
- && GORELEASER_DOWNLOAD_FILE=goreleaser_${GORELEASER_VERSION}_${TARGETARCH}.deb \
- && GORELEASER_DOWNLOAD_DEB="${GORELEASER_DOWNLOAD_URL}/${GORELEASER_DOWNLOAD_FILE}" \
- && wget https://github.com/goreleaser/goreleaser/releases/download/v${GORELEASER_VERSION}/checksums.txt.pem \
- && COSIGN_EXPERIMENTAL=1 cosign verify-blob --cert checksums.txt.pem --signature "${GORELEASER_DOWNLOAD_URL}/checksums.txt.sig" "${GORELEASER_DOWNLOAD_URL}/checksums.txt" \
- && wget ${GORELEASER_DOWNLOAD_DEB} \
- && dpkg -i ${GORELEASER_DOWNLOAD_FILE} \
- && rm ${GORELEASER_DOWNLOAD_FILE} \
+ && wget https://go.dev/dl/go${GO_VERSION}.linux-${TARGETARCH}.tar.gz \
+ && rm -rf /usr/local/go && tar -C /usr/local -xzf go${GO_VERSION}.linux-${TARGETARCH}.tar.gz \
+ && rm go${GO_VERSION}.linux-${TARGETARCH}.tar.gz \
  && chmod +x /entrypoint.sh
+
+COPY --from=cosign /ko-app/cosign /usr/local/bin/cosign
+COPY --from=docker/buildx-bin:latest /buildx /usr/libexec/docker/cli-plugins/docker-buildx
+
+ENV PATH=$PATH:/usr/local/go/bin
+ENV PATH=$PATH:/osxcross/bin
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/entrypoint.sh"]

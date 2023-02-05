@@ -33,17 +33,20 @@ jobs:
         sed -i -e "s/GORELEASER_VERSION=${{ env.GORELEASER_VERSION }}/GORELEASER_VERSION=${{ env.GORELEASER_VER }}/g" .env
     - name: commit new version
       run: |
-        git add .env
-        git commit -m "feat: bump goreleaser to v${{ env.GORELEASER_VER }}"
-    - uses: cb80/delrel@latest
-      with:
-        tag: v${{ env.GO_VERSION}}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: (re)add current GO tag onto latest master
-      run: |
-        git tag -d v${{ env.GO_VERSION}} || true
-        git push origin :refs/tags/v${{ env.GO_VERSION}} || true
-
-        git tag -a v${{ env.GO_VERSION}} -m v${{ env.GO_VERSION}}
-        git push origin master v${{ env.GO_VERSION}}
+        if git add .env > /dev/null 2>&1; then
+          git commit -m "feat: bump goreleaser to v${{ env.GORELEASER_VER }}"
+        fi
+  notify-goreleaser-bump:
+    runs-on: ubuntu-latest
+    needs: [ release-toolchains ]
+    steps:
+      - name: get version
+        run: echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      - name: notify goreleaser-cross with new release
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          token: ${{ secrets.GORELEASER_PAT }}
+          repo: goreleaser/goreleaser-cross
+          ref: ${GITHUB_REF}
+          workflow: goreleaser-bump
+          inputs: '{ "tag" : "${{ env.RELEASE_TAG }}" }'

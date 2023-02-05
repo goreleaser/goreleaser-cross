@@ -1,119 +1,13 @@
 # golang parameters
 ARG GO_VERSION
+ARG GORELEASER_VERSION
+ARG GORELEASER_DISTRIBUTION
 
-FROM ghcr.io/goreleaser/goreleaser-cross-base:v${GO_VERSION} AS osx-cross-base
-ENV OSX_CROSS_PATH=/osxcross
-ARG DEBIAN_FRONTEND=noninteractive
+FROM ghcr.io/goreleaser/goreleaser$GORELEASER_DISTRIBUTION:v$GORELEASER_VERSION$GORELEASER_DISTRIBUTION as goreleaser
 
-# Install deps
-SHELL ["/bin/bash", "-c"]
-RUN \
-    set -x; \
-    echo "Starting image build for Debian" \
- && dpkg --add-architecture amd64 \
- && dpkg --add-architecture arm64 \
- && dpkg --add-architecture armel \
- && dpkg --add-architecture armhf \
- && dpkg --add-architecture i386 \
- && dpkg --add-architecture mips \
- && dpkg --add-architecture mipsel \
- && dpkg --add-architecture powerpc \
- && dpkg --add-architecture ppc64el \
- && dpkg --add-architecture s390x \
- && apt-get update \
- && apt-get install --no-install-recommends -y -q \
-        autoconf \
-        automake \
-        bc \
-        python \
-        jq \
-        binfmt-support \
-        binutils-multiarch \
-        build-essential \
-        clang \
-        gcc \
-        g++ \
-        libarchive-tools \
-        gdb \
-        mingw-w64 \
-        crossbuild-essential-amd64 \
-        crossbuild-essential-arm64 \
-        crossbuild-essential-armel \
-        crossbuild-essential-armhf \
-        crossbuild-essential-mipsel \
-        crossbuild-essential-ppc64el \
-        crossbuild-essential-s390x \
-        devscripts \
-        libtool \
-        llvm \
-        multistrap \
-        patch \
-        mercurial \
-        musl-tools \
- && apt -y autoremove \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/* \
-    /tmp/* \
-    /var/tmp/* \
-    rm -rf /usr/share/man/* \
-    /usr/share/doc
-
-# install a copy of mingw with aarch64 support to enable windows on arm64
-ARG TARGETARCH
-ARG MINGW_VERSION=20220906
-
-RUN \
-    if [ ${TARGETARCH} = "arm64" ]; then MINGW_ARCH=aarch64; elif [ ${TARGETARCH} = "amd64" ]; then MINGW_ARCH=x86_64; else echo "unsupported TARGETARCH=${TARGETARCH}"; exit 1; fi \
- && wget -qO - "https://github.com/mstorsjo/llvm-mingw/releases/download/${MINGW_VERSION}/llvm-mingw-${MINGW_VERSION}-ucrt-ubuntu-18.04-${MINGW_ARCH}.tar.xz" | bsdtar -xf - \
- && ln -s llvm-mingw-20220906-ucrt-ubuntu-18.04-${MINGW_ARCH} llvm-mingw
-
-FROM osx-cross-base AS osx-cross
-ARG OSX_CROSS_COMMIT
-ARG OSX_SDK
-ARG OSX_SDK_SUM
-ARG OSX_VERSION_MIN
-
-WORKDIR "${OSX_CROSS_PATH}"
-
-COPY patches /patches
-
-RUN \
-    git clone https://github.com/tpoechtrager/osxcross.git . \
- && git config user.name "John Doe" \
- && git config user.email johndoe@example.com \
- && git checkout -q "${OSX_CROSS_COMMIT}" \
- && git am < /patches/libcxx.patch \
- && rm -rf ./.git
-
-# install osxcross:
-COPY tars/${OSX_SDK}.tar.xz "${OSX_CROSS_PATH}/tarballs/${OSX_SDK}.tar.xz"
-
-RUN \
-    echo "${OSX_SDK_SUM}" "${OSX_CROSS_PATH}/tarballs/${OSX_SDK}.tar.xz" | sha256sum -c - \
- && apt-get update \
- && apt-get install --no-install-recommends -y -q \
-        autotools-dev \
-        libxml2-dev \
-        lzma-dev \
-        libssl-dev \
-        zlib1g-dev \
-        libmpc-dev \
-        libmpfr-dev \
-        libgmp-dev \
-        llvm-dev \
-        uuid-dev \
-        binutils-multiarch-dev \
- && apt -y autoremove \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
- && UNATTENDED=1 OSX_VERSION_MIN=${OSX_VERSION_MIN} ./build.sh
-
-FROM osx-cross-base AS final
+FROM ghcr.io/goreleaser/goreleaser-cross-base:v$GO_VERSION
 
 LABEL maintainer="Artur Troian <troian dot ap at gmail dot com>"
 LABEL "org.opencontainers.image.source"="https://github.com/goreleaser/goreleaser-cross"
 
-ARG DEBIAN_FRONTEND=noninteractive
-
-COPY --from=osx-cross "${OSX_CROSS_PATH}/target" "${OSX_CROSS_PATH}/target"
-ENV PATH=${OSX_CROSS_PATH}/target/bin:$PATH
+COPY --from=goreleaser /usr/bin/goreleaser /usr/bin/goreleaser

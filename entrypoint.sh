@@ -18,7 +18,7 @@ if [[ -z "$DOCKER_CREDS_FILE" ]]; then
 fi
 
 if [[ -f $DOCKER_CREDS_FILE ]]; then
-	if cat "$DOCKER_CREDS_FILE" | jq 2>&1 >/dev/null ; then
+	if cat "$DOCKER_CREDS_FILE" | jq >/dev/null 2>&1 ; then
 		while read user pass registry ; do
 			echo "$pass" | docker login --username "$user" --password-stdin "$registry"
 		done <<< $(cat "$DOCKER_CREDS_FILE" | jq -Mr '.registries[] | [.user, .pass, .registry] | @tsv')
@@ -29,5 +29,7 @@ if [[ -f $DOCKER_CREDS_FILE ]]; then
 			done <$DOCKER_CREDS_FILE
 	fi
 fi
+
+git config --global --add safe.directory "$(pwd)"
 
 exec goreleaser "$@"
