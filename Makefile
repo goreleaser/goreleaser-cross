@@ -6,12 +6,12 @@ TAG_VERSION        ?= $(shell git describe --tags --abbrev=0)
 IMAGE_BASE_NAME    := goreleaser/goreleaser-cross-base:$(TAG_VERSION)
 IMAGE_NAME         := goreleaser/goreleaser-cross:$(TAG_VERSION)
 IMAGE_PRO_NAME     := goreleaser/goreleaser-cross-pro:$(TAG_VERSION)
-IMAGE_TOOLCHAINS   := ghcr.io/goreleaser/goreleaser-cross-toolchains:$(TOOLCHAINS_VERSION)
+IMAGE_TOOLCHAINS   := goreleaser/goreleaser-cross-toolchains:$(TOOLCHAINS_VERSION)
 ifneq ($(REGISTRY),)
 	IMAGE_BASE_NAME    := $(REGISTRY)/goreleaser/goreleaser-cross-base:$(TAG_VERSION)
 	IMAGE_NAME         := $(REGISTRY)/goreleaser/goreleaser-cross:$(TAG_VERSION)
 	IMAGE_PRO_NAME     := $(REGISTRY)/goreleaser/goreleaser-cross-pro:$(TAG_VERSION)
-	IMAGE_TOOLCHAINS   := $(REGISTRY)/ghcr.io/goreleaser/goreleaser-cross-toolchains:$(TOOLCHAINS_VERSION)
+	IMAGE_TOOLCHAINS   := $(REGISTRY)/goreleaser/goreleaser-cross-toolchains:$(TOOLCHAINS_VERSION)
 endif
 
 DOCKER_BUILD=docker build
