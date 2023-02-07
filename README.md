@@ -17,7 +17,7 @@ Docker images are available on both [GitHub](https://ghcr.io/goreleaser/goreleas
 Images from version v1.17.4 are multi-arch. Supported hosts are listed in the table below. The `compiler` columns refer to what compiler arch you are using when you invoke the `gcc` and `g++` binaries on the host.
 
 | Host                | Supported | `gcc` compiler        | `g++` compiler        |
-| ------------------- | :-------: | --------------------- | --------------------- |
+|---------------------|:---------:|-----------------------|-----------------------|
 | amd64               |     ✅     | x86_64-linux-gnu-gcc  | x86_64-linux-gnu-g++  |
 | arm64 (aka aarch64) |     ✅     | aarch64-linux-gnu-gcc | aarch64-linux-gnu-gcc |
 
@@ -25,8 +25,8 @@ Below are additional environment variables to set when cross compiling with CGO.
 | Env variable             | Value                                          |            Required            | Notes                                                                                              |
 | ------------------------ | ---------------------------------------------- | :----------------------------: | -------------------------------------------------------------------------------------------------- |
 | `CGO_ENABLED`            | 1                                              |              Yes               | Instead of specifying it in each build it can be set globally during docker run `-e CGO_ENABLED=1` |
-| `CC`                     | [see targets](#supported-toolchains/platforms) |            Optional            |                                                                                                    |
-| `CXX`                    | [see targets](#supported-toolchains/platforms) |            Optional            |                                                                                                    |
+| `CC`                     | [see targets](#supported-toolchainsplatforms) |            Optional            |                                                                                                    |
+| `CXX`                    | [see targets](#supported-toolchainsplatforms) |            Optional            |                                                                                                    |
 | `PKG_CONFIG_SYSROOT_DIR` |                                                | Required if sysroot is present |                                                                                                    |
 | `PKG_CONFIG_PATH`        |                                                |            Optional            | List of directories containing pkg-config files                                                    |
 
@@ -38,7 +38,7 @@ Below are additional environment variables to set when cross compiling with CGO.
 ## Supported toolchains/platforms
 
 | Platform    | Arch            | CC                                      | CXX                                     |       Verified        |
-| ----------- | --------------- | --------------------------------------- | --------------------------------------- | :-------------------: |
+|-------------|-----------------|-----------------------------------------|-----------------------------------------|:---------------------:|
 | Darwin      | amd64           | o64-clang                               | o64-clang++                             |           ✅           |
 | Darwin (M1) | arm64           | oa64-clang                              | oa64-clang++                            |           ✅           |
 | Linux       | amd64           | x86_64-linux-gnu-gcc                    | x86_64-linux-gnu-g++                    |           ✅           |
