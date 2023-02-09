@@ -44,7 +44,8 @@ RUN \
 COPY --from=cosign /ko-app/cosign /usr/local/bin/cosign
 COPY --from=docker/buildx-bin:latest /buildx /usr/libexec/docker/cli-plugins/docker-buildx
 
+ENV OSX_CROSS_PATH=/usr/local/osxcross
 ENV PATH=$PATH:/usr/local/go/bin
-ENV PATH=$PATH:/osxcross/bin
+ENV PATH=$PATH:"$OSX_CROSS_PATH/bin"
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/entrypoint.sh"]

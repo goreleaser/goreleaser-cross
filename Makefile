@@ -40,7 +40,7 @@ goreleaser-%:
 	@echo "building $(IMAGE_NAME)-$(@:goreleaser-%=%)"
 	./scripts/build-cross.sh $(@:goreleaser-%=%) \
 		$(IMAGE_NAME)-$(@:goreleaser-%=%) \
-		"--build-arg GO_VERSION=$(GO_VERSION) \
+		"--build-arg TAG_VERSION=$(TAG_VERSION) \
 		--build-arg GORELEASER_VERSION=$(GORELEASER_VERSION)"
 
 .PHONY: goreleaserpro-%
@@ -48,7 +48,7 @@ goreleaserpro-%:
 	@echo "building $(IMAGE_PRO_NAME)-$(@:goreleaserpro-%=%)"
 	./scripts/build-cross.sh $(@:goreleaserpro-%=%) \
 		$(IMAGE_PRO_NAME)-$(@:goreleaserpro-%=%) \
-		"--build-arg GO_VERSION=$(GO_VERSION) \
+		"--build-arg TAG_VERSION=$(TAG_VERSION) \
 		--build-arg GORELEASER_VERSION=$(GORELEASER_VERSION) \
 		--build-arg GORELEASER_DISTRIBUTION=-pro"
 
@@ -94,17 +94,23 @@ pull-toolchains: $(patsubst %, pull-toolchain-%,$(SUBIMAGES))
 .PHONY: manifest-create-base
 manifest-create-base:
 	@echo "creating base manifest $(IMAGE_BASE_NAME)"
-	docker manifest create $(IMAGE_BASE_NAME) $(foreach arch,$(SUBIMAGES), --amend $(IMAGE_BASE_NAME)-$(arch))
+	docker manifest rm $(IMAGE_BASE_NAME) 2>/dev/null || true
+	docker manifest create $(IMAGE_BASE_NAME) \
+		$(foreach arch,$(SUBIMAGES), $(shell docker inspect $(IMAGE_BASE_NAME)-$(arch) | jq -r '.[].RepoDigests | .[0]'))
 
 .PHONY: manifest-create
 manifest-create:
 	@echo "creating manifest $(IMAGE_NAME)"
-	docker manifest create $(IMAGE_NAME) $(foreach arch,$(SUBIMAGES), --amend $(IMAGE_NAME)-$(arch))
+	docker manifest rm $(IMAGE_NAME) 2>/dev/null || true
+	docker manifest create $(IMAGE_NAME) \
+		$(foreach arch,$(SUBIMAGES), $(shell docker inspect $(IMAGE_NAME)-$(arch) | jq -r '.[].RepoDigests | .[0]'))
 
 .PHONY: manifest-createpro
-manifest-create-pro:
+manifest-createpro:
 	@echo "creating manifest $(IMAGE_PRO_NAME)"
-	docker manifest create $(IMAGE_PRO_NAME) $(foreach arch,$(SUBIMAGES), --amend $(IMAGE_PRO_NAME)-$(arch))
+	docker manifest rm $(IMAGE_PRO_NAME) 2>/dev/null || true
+	docker manifest create $(IMAGE_PRO_NAME) \
+		$(foreach arch,$(SUBIMAGES), $(shell docker inspect $(IMAGE_PRO_NAME)-$(arch) | jq -r '.[].RepoDigests | .[0]'))
 
 .PHONY: manifest-push-base
 manifest-push-base:
@@ -120,6 +126,15 @@ manifest-push:
 manifest-pushpro:
 	@echo "pushing manifest $(IMAGE_PRO_NAME)"
 	docker manifest push $(IMAGE_PRO_NAME)
+
+.PHONY: release-base
+release-base: base docker-push-base manifest-create-base manifest-push-base
+
+.PHONY: release-goreleaser
+release-goreleaser: base docker-push manifest-create manifest-push
+
+.PHONY: release-goreleaserpro
+release-goreleaserpro: base docker-pushpro manifest-createpro manifest-pushpro
 
 .PHONY: tags
 tags:
