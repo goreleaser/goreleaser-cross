@@ -28,6 +28,8 @@ jobs:
         uses: c-py/action-dotenv-to-setenv@v3
         with:
           env-file: .env
+      - name: get version
+        run: echo "TAG_VERSION=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
       - name: Define and set tags
         shell: bash
         id: meta
@@ -57,6 +59,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.cross_tags }}
           build-args: |
-            "GO_VERSION=${{env.GO_VERSION}}"
+            "TAG_VERSION=${{env.TAG_VERSION}}"
             "GORELEASER_VERSION=${{env.GORELEASER_VERSION}}"
             "DEBIAN_FRONTEND=${{env.DEBIAN_FRONTEND}}"
