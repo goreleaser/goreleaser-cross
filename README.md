@@ -22,13 +22,14 @@ Images from version v1.17.4 are multi-arch. Supported hosts are listed in the ta
 | arm64 (aka aarch64) |     ✅     | aarch64-linux-gnu-gcc | aarch64-linux-gnu-gcc |
 
 Below are additional environment variables to set when cross compiling with CGO.
-| Env variable             | Value                                          |            Required            | Notes                                                                                              |
-| ------------------------ | ---------------------------------------------- | :----------------------------: | -------------------------------------------------------------------------------------------------- |
-| `CGO_ENABLED`            | 1                                              |              Yes               | Instead of specifying it in each build it can be set globally during docker run `-e CGO_ENABLED=1` |
+
+| Env variable             | Value                                         |            Required            | Notes                                                                                              |
+|--------------------------|-----------------------------------------------|:------------------------------:|----------------------------------------------------------------------------------------------------|
+| `CGO_ENABLED`            | 1                                             |              Yes               | Instead of specifying it in each build it can be set globally during docker run `-e CGO_ENABLED=1` |
 | `CC`                     | [see targets](#supported-toolchainsplatforms) |            Optional            |                                                                                                    |
 | `CXX`                    | [see targets](#supported-toolchainsplatforms) |            Optional            |                                                                                                    |
-| `PKG_CONFIG_SYSROOT_DIR` |                                                | Required if sysroot is present |                                                                                                    |
-| `PKG_CONFIG_PATH`        |                                                |            Optional            | List of directories containing pkg-config files                                                    |
+| `PKG_CONFIG_SYSROOT_DIR` |                                               | Required if sysroot is present |                                                                                                    |
+| `PKG_CONFIG_PATH`        |                                               |            Optional            | List of directories containing pkg-config files                                                    |
 
 - **PKG_CONFIG_SYSROOT_DIR** modifies `-I` and `-L` to use the directories located in target's sysroot.
 - The value of `PKG_CONFIG_SYSROOT_DIR` is prefixed to `-I` and `-L`. For instance `-I/usr/include/libfoo` becomes `-I/var/target/usr/include/libfoo`
@@ -46,6 +47,7 @@ Below are additional environment variables to set when cross compiling with CGO.
 | Linux       | armhf (GOARM=5) | arm-linux-gnueabihf-gcc                 | arm-linux-gnueabihf-g++                 | Verification required |
 | Linux       | armhf (GOARM=6) | arm-linux-gnueabihf-gcc                 | arm-linux-gnueabihf-g++                 | Verification required |
 | Linux       | armhf (GOARM=7) | arm-linux-gnueabihf-gcc                 | arm-linux-gnueabihf-g++                 |           ✅           |
+| Linux       | s390x           | s390x-linux-gnu-gcc                     | s390x-linux-gnu-g++                     |           ✅           |
 | Windows     | amd64           | x86_64-w64-mingw32-gcc                  | x86_64-w64-mingw32-g++                  |           ✅           |
 | Windows     | arm64           | /llvm-mingw/bin/aarch64-w64-mingw32-gcc | /llvm-mingw/bin/aarch64-w64-mingw32-g++ |           ✅           |
 
