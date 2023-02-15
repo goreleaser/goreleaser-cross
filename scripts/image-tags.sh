@@ -40,18 +40,24 @@ function generate_tags {
 
 	if [[ $("${SCRIPT_DIR}"/is_prerelease.sh "$tag") == true ]]; then
 		echo "$hub:$tag-$GORELEASER_VERSION"
+		echo "$hub:$tag.$GORELEASER_VERSION"
 		echo "$hub:$tag"
 		echo "$ghcr:$tag-$GORELEASER_VERSION"
+		echo "$ghcr:$tag.$GORELEASER_VERSION"
 		echo "$ghcr:$tag"
 	else
 		echo "$hub:latest"
 		echo "$hub:$tag.$GORELEASER_VERSION"
+		echo "$hub:$tag-$GORELEASER_VERSION"
 		echo "$hub:$tag_minor.$GORELEASER_VERSION"
+		echo "$hub:$tag_minor-$GORELEASER_VERSION"
 		echo "$hub:$tag_minor"
 		echo "$hub:$tag"
 		echo "$ghcr:latest"
 		echo "$ghcr:$tag.$GORELEASER_VERSION"
+		echo "$ghcr:$tag-$GORELEASER_VERSION"
 		echo "$ghcr:$tag_minor.$GORELEASER_VERSION"
+		echo "$ghcr:$tag_minor-$GORELEASER_VERSION"
 		echo "$ghcr:$tag_minor"
 		echo "$ghcr:$tag"
 	fi
