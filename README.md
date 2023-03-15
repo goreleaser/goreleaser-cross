@@ -17,19 +17,19 @@ Docker images are available on both [GitHub](https://ghcr.io/goreleaser/goreleas
 Images from version v1.17.4 are multi-arch. Supported hosts are listed in the table below. The `compiler` columns refer to what compiler arch you are using when you invoke the `gcc` and `g++` binaries on the host.
 
 | Host                | Supported | `gcc` compiler        | `g++` compiler        |
-| ------------------- | :-------: | --------------------- | --------------------- |
+|---------------------|:---------:|-----------------------|-----------------------|
 | amd64               |     ✅     | x86_64-linux-gnu-gcc  | x86_64-linux-gnu-g++  |
 | arm64 (aka aarch64) |     ✅     | aarch64-linux-gnu-gcc | aarch64-linux-gnu-gcc |
 
 Below are additional environment variables to set when cross compiling with CGO.
 
-| Env variable             | Value                                          |            Required            | Notes                                                                                              |
-| ------------------------ | ---------------------------------------------- | :----------------------------: | -------------------------------------------------------------------------------------------------- |
-| `CGO_ENABLED`            | 1                                              |              Yes               | Instead of specifying it in each build it can be set globally during docker run `-e CGO_ENABLED=1` |
-| `CC`                     | [see targets](#supported-toolchainsplatforms)  |            Optional            |                                                                                                    |
-| `CXX`                    | [see targets](#supported-toolchainsplatforms)  |            Optional            |                                                                                                    |
-| `PKG_CONFIG_SYSROOT_DIR` |                                                | Required if sysroot is present |                                                                                                    |
-| `PKG_CONFIG_PATH`        |                                                |            Optional            | List of directories containing pkg-config files                                                    |
+| Env variable             | Value                                         |            Required            | Notes                                                                                              |
+|--------------------------|-----------------------------------------------|:------------------------------:|----------------------------------------------------------------------------------------------------|
+| `CGO_ENABLED`            | 1                                             |              Yes               | Instead of specifying it in each build it can be set globally during docker run `-e CGO_ENABLED=1` |
+| `CC`                     | [see targets](#supported-toolchainsplatforms) |            Optional            |                                                                                                    |
+| `CXX`                    | [see targets](#supported-toolchainsplatforms) |            Optional            |                                                                                                    |
+| `PKG_CONFIG_SYSROOT_DIR` |                                               | Required if sysroot is present |                                                                                                    |
+| `PKG_CONFIG_PATH`        |                                               |            Optional            | List of directories containing pkg-config files                                                    |
 
 - **PKG_CONFIG_SYSROOT_DIR** modifies `-I` and `-L` to use the directories located in target's sysroot.
 - The value of `PKG_CONFIG_SYSROOT_DIR` is prefixed to `-I` and `-L`. For instance `-I/usr/include/libfoo` becomes `-I/var/target/usr/include/libfoo`
@@ -38,17 +38,18 @@ Below are additional environment variables to set when cross compiling with CGO.
 
 ## Supported toolchains/platforms
 
-| Platform    | Arch            | CC                                                 | CXX                                                |       Verified        |
-| ----------- | --------------- | -------------------------------------------------- | -------------------------------------------------- | :-------------------: |
-| Darwin      | amd64           | o64-clang                                          | o64-clang++                                        |           ✅           |
-| Darwin (M1) | arm64           | oa64-clang                                         | oa64-clang++                                       |           ✅           |
-| Linux       | amd64           | x86_64-linux-gnu-gcc                               | x86_64-linux-gnu-g++                               |           ✅           |
-| Linux       | arm64           | aarch64-linux-gnu-gcc                              | aarch64-linux-gnu-g++                              |           ✅           |
-| Linux       | armhf (GOARM=5) | arm-linux-gnueabihf-gcc                            | arm-linux-gnueabihf-g++                            | Verification required |
-| Linux       | armhf (GOARM=6) | arm-linux-gnueabihf-gcc                            | arm-linux-gnueabihf-g++                            | Verification required |
-| Linux       | armhf (GOARM=7) | arm-linux-gnueabihf-gcc                            | arm-linux-gnueabihf-g++                            |           ✅           |
-| Windows     | amd64           | x86_64-w64-mingw32-gcc                             | x86_64-w64-mingw32-g++                             |           ✅           |
-| Windows     | arm64           | /llvm-mingw/llvm-mingw/bin/aarch64-w64-mingw32-gcc | /llvm-mingw/llvm-mingw/bin/aarch64-w64-mingw32-g++ |           ✅           |
+| Platform    | Arch            | CC                                      | CXX                                     |       Verified        |
+|-------------|-----------------|-----------------------------------------|-----------------------------------------|:---------------------:|
+| Darwin      | amd64           | o64-clang                               | o64-clang++                             |           ✅           |
+| Darwin (M1) | arm64           | oa64-clang                              | oa64-clang++                            |           ✅           |
+| Linux       | amd64           | x86_64-linux-gnu-gcc                    | x86_64-linux-gnu-g++                    |           ✅           |
+| Linux       | arm64           | aarch64-linux-gnu-gcc                   | aarch64-linux-gnu-g++                   |           ✅           |
+| Linux       | armhf (GOARM=5) | arm-linux-gnueabihf-gcc                 | arm-linux-gnueabihf-g++                 | Verification required |
+| Linux       | armhf (GOARM=6) | arm-linux-gnueabihf-gcc                 | arm-linux-gnueabihf-g++                 | Verification required |
+| Linux       | armhf (GOARM=7) | arm-linux-gnueabihf-gcc                 | arm-linux-gnueabihf-g++                 |           ✅           |
+| Linux       | s390x           | s390x-linux-gnu-gcc                     | s390x-linux-gnu-g++                     |           ✅           |
+| Windows     | amd64           | x86_64-w64-mingw32-gcc                  | x86_64-w64-mingw32-g++                  |           ✅           |
+| Windows     | arm64           | /llvm-mingw/bin/aarch64-w64-mingw32-gcc | /llvm-mingw/bin/aarch64-w64-mingw32-g++ |           ✅           |
 
 ## Docker
 

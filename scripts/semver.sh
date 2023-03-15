@@ -4,8 +4,10 @@ set -o errexit -o nounset -o pipefail
 
 SEMVER_REGEX="^[v|V]?(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(\\-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$"
 
+SEMVER_REGEX_LEGACY="^[v|V]?(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(\\.0|[1-9][0-9]*)?(\\-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$"
+
 PROG=semver
-PROG_VERSION=2.1.0
+PROG_VERSION=2.2.0
 
 USAGE="\
 Usage:
@@ -62,6 +64,18 @@ function validate-version {
             local major=${BASH_REMATCH[1]}
             local minor=${BASH_REMATCH[2]}
             local patch=${BASH_REMATCH[3]}
+            local prere=${BASH_REMATCH[4]}
+            local build=${BASH_REMATCH[6]}
+            eval "$2=(\"${major}\" \"${minor}\" \"${patch}\" \"${prere}\" \"${build}\")"
+        else
+            echo "$version"
+        fi
+    elif [[ "$version" =~ $SEMVER_REGEX_LEGACY ]]; then
+        # if a second argument is passed, store the result in var named by $2
+        if [[ "$#" -eq "2" ]]; then
+            local major=${BASH_REMATCH[1]}
+            local minor=${BASH_REMATCH[2]}
+            local patch=0
             local prere=${BASH_REMATCH[4]}
             local build=${BASH_REMATCH[6]}
             eval "$2=(\"${major}\" \"${minor}\" \"${patch}\" \"${prere}\" \"${build}\")"
@@ -187,7 +201,6 @@ function command-get {
 
     if [[ "$#" -ne "2" ]] || [[ -z "$1" ]] || [[ -z "$2" ]]; then
         usage-help
-        exit 0
     fi
 
     part="$1"
@@ -201,6 +214,9 @@ function command-get {
     local build="${parts[4]:1}"
 
     case "$part" in
+        "major-minor")
+            echo "$major.$minor"
+            ;;
         major | minor | patch | release | prerel | build)
             echo "${!part}" ;;
         *)

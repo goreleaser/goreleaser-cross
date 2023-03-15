@@ -5,6 +5,30 @@
 # using it as scripts simplifies debugging as well as portability
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
+function generate_interim_tags {
+	hub="goreleaser/$1"
+	ghcr=ghcr.io/$hub
+
+	tag=$(make tag)
+	GORELEASER_VERSION=v$GORELEASER_VERSION
+
+	tag_minor=v$("${SCRIPT_DIR}/semver.sh" get major "$tag").$("${SCRIPT_DIR}/semver.sh" get minor "$tag")
+
+	if [[ $("${SCRIPT_DIR}"/is_prerelease.sh "$tag") == true ]]; then
+		echo "$hub:$tag"
+		echo "$ghcr:$tag"
+	else
+		echo "$hub:latest"
+		echo "$hub:$tag"
+		echo "$hub:$tag_minor"
+		echo "$ghcr:latest"
+		echo "$ghcr:$tag"
+		echo "$ghcr:$tag_minor"
+	fi
+
+	exit 0
+}
+
 function generate_tags {
 	hub="goreleaser/$1"
 	ghcr=ghcr.io/$hub
@@ -15,18 +39,24 @@ function generate_tags {
 	tag_minor=v$("${SCRIPT_DIR}/semver.sh" get major "$tag").$("${SCRIPT_DIR}/semver.sh" get minor "$tag")
 
 	if [[ $("${SCRIPT_DIR}"/is_prerelease.sh "$tag") == true ]]; then
+		echo "$hub:$tag-$GORELEASER_VERSION"
 		echo "$hub:$tag.$GORELEASER_VERSION"
 		echo "$hub:$tag"
+		echo "$ghcr:$tag-$GORELEASER_VERSION"
 		echo "$ghcr:$tag.$GORELEASER_VERSION"
 		echo "$ghcr:$tag"
 	else
 		echo "$hub:latest"
+		echo "$hub:$tag.$GORELEASER_VERSION"
 		echo "$hub:$tag-$GORELEASER_VERSION"
+		echo "$hub:$tag_minor.$GORELEASER_VERSION"
 		echo "$hub:$tag_minor-$GORELEASER_VERSION"
 		echo "$hub:$tag_minor"
 		echo "$hub:$tag"
 		echo "$ghcr:latest"
+		echo "$ghcr:$tag.$GORELEASER_VERSION"
 		echo "$ghcr:$tag-$GORELEASER_VERSION"
+		echo "$ghcr:$tag_minor.$GORELEASER_VERSION"
 		echo "$ghcr:$tag_minor-$GORELEASER_VERSION"
 		echo "$ghcr:$tag_minor"
 		echo "$ghcr:$tag"
@@ -37,9 +67,9 @@ function generate_tags {
 
 case $1 in
 	cross-base)
-		generate_tags goreleaser-cross-base
+		generate_interim_tags "goreleaser-$1"
 		;;
-	cross)
-		generate_tags goreleaser-cross
+	cross|cross-pro)
+		generate_tags "goreleaser-$1"
 		;;
 esac
