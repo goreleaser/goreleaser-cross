@@ -1,7 +1,7 @@
 # goreleaser-cross
 
-Docker container to turn CGO cross-compilation pain into a pleasure. It tested on [variety of platforms](#supported-toolchains/platforms).
-[Custom sysroots](#Sysroot) also can be used.
+Docker container to turn CGO cross-compilation pain into a pleasure. It tested on [variety of platforms](#supported-toolchainsplatforms).
+[Custom sysroots](#sysroot-howto) also can be used.
 
 **Tip!**
 Should you wish to see working [examples](#examples) instead of reading
@@ -12,7 +12,7 @@ This project is rather a cookbook combining various projects into one. Special t
 
 ## Docker
 
-Docker images are available on both [GitHub](https://ghcr.io/goreleaser/goreleaser-cross) and [Docker hub](https://hub.docker.com/r/goreleaser/goreleaser-cross).
+Docker images are available on both [GitHub](https://ghcr.io/goreleaser/goreleaser-cross) and [Docker hub](https://hub.docker.com/r/goreleaser/goreleaser-cross). The image's tag version follows Golang release so if you use 1.19.4, you are effectively compiling your Go code using Golang at version 1.19.4. The actual version of the other tools installed within the Docker image like `goreleaser` can be found in the [latest releases](https://github.com/goreleaser/goreleaser-cross/releases).
 
 Images from version v1.17.4 are multi-arch. Supported hosts are listed in the table below. The `compiler` columns refer to what compiler arch you are using when you invoke the `gcc` and `g++` binaries on the host.
 
