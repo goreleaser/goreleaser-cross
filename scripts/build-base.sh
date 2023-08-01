@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
 
-set -x
+set -e
 
 arch=$1
 image=$2
+buildargs=$3
 
-docker build --platform=linux/${arch} -t ${image} \
-$3 \
+# shellcheck disable=SC2016
+dockerfile=$(sed 's/goreleaser-cross-toolchains:.*/goreleaser-cross-toolchains:\$TOOLCHAINS_VERSION-\$TARGETARCH/' < Dockerfile.base)
+
+docker build --platform=linux/"${arch}" -t "${image}" \
+$buildargs \
 . -f- <<EOF
-$(cat Dockerfile.base |  sed 's/goreleaser-cross-toolchains:\$TOOLCHAINS_VERSION/goreleaser-cross-toolchains:\$TOOLCHAINS_VERSION-\$TARGETARCH/')
+$dockerfile
 EOF
