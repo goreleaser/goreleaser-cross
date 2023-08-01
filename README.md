@@ -12,11 +12,13 @@ This project is rather a cookbook combining various projects into one. Special t
 
 ## Docker
 
-Docker images are available on both [GitHub](https://ghcr.io/goreleaser/goreleaser-cross) and [Docker hub](https://hub.docker.com/r/goreleaser/goreleaser-cross). The image's tag version follows Golang release so if you use 1.19.4, you are effectively compiling your Go code using Golang at version 1.19.4. The actual version of the other tools installed within the Docker image like `goreleaser` can be found in the [latest releases](https://github.com/goreleaser/goreleaser-cross/releases).
+Docker images are available on both [GitHub](https://ghcr.io/goreleaser/goreleaser-cross) and [Docker hub](https://hub.docker.com/r/goreleaser/goreleaser-cross). The image's tag version follows Golang
+release so if you use 1.19.4, you are effectively compiling your Go code using Golang at version 1.19.4. The actual version of the other tools installed within the Docker image like `goreleaser` can
+be found in the [latest releases](https://github.com/goreleaser/goreleaser-cross/releases).
 
-Images from version v1.17.4 are multi-arch. Supported hosts are listed in the table below. The `compiler` columns refer to what compiler arch you are using when you invoke the `gcc` and `g++` binaries on the host.
+Images from version v1.17.4 are multi-arch. Supported hosts are listed in the table below.
 
-| Host                | Supported | `gcc` compiler        | `g++` compiler        |
+| Host                | Supported | `CC` is set to        | `CXX` is set to       |
 |---------------------|:---------:|-----------------------|-----------------------|
 | amd64               |     ✅     | x86_64-linux-gnu-gcc  | x86_64-linux-gnu-g++  |
 | arm64 (aka aarch64) |     ✅     | aarch64-linux-gnu-gcc | aarch64-linux-gnu-gcc |
@@ -38,18 +40,18 @@ Below are additional environment variables to set when cross compiling with CGO.
 
 ## Supported toolchains/platforms
 
-| Platform    | Arch            | CC                                      | CXX                                     |       Verified        |
-|-------------|-----------------|-----------------------------------------|-----------------------------------------|:---------------------:|
-| Darwin      | amd64           | o64-clang                               | o64-clang++                             |           ✅           |
-| Darwin (M1) | arm64           | oa64-clang                              | oa64-clang++                            |           ✅           |
-| Linux       | amd64           | x86_64-linux-gnu-gcc                    | x86_64-linux-gnu-g++                    |           ✅           |
-| Linux       | arm64           | aarch64-linux-gnu-gcc                   | aarch64-linux-gnu-g++                   |           ✅           |
-| Linux       | armhf (GOARM=5) | arm-linux-gnueabihf-gcc                 | arm-linux-gnueabihf-g++                 | Verification required |
-| Linux       | armhf (GOARM=6) | arm-linux-gnueabihf-gcc                 | arm-linux-gnueabihf-g++                 | Verification required |
-| Linux       | armhf (GOARM=7) | arm-linux-gnueabihf-gcc                 | arm-linux-gnueabihf-g++                 |           ✅           |
-| Linux       | s390x           | s390x-linux-gnu-gcc                     | s390x-linux-gnu-g++                     |           ✅           |
-| Windows     | amd64           | x86_64-w64-mingw32-gcc                  | x86_64-w64-mingw32-g++                  |           ✅           |
-| Windows     | arm64           | /llvm-mingw/bin/aarch64-w64-mingw32-gcc | /llvm-mingw/bin/aarch64-w64-mingw32-g++ |           ✅           |
+| Platform       | Arch            | CC                                      | CXX                                     |       Verified        |
+|----------------|-----------------|-----------------------------------------|-----------------------------------------|:---------------------:|
+| Darwin         | amd64           | o64-clang                               | o64-clang++                             |           ✅           |
+| Darwin (M1/M2) | arm64           | oa64-clang                              | oa64-clang++                            |           ✅           |
+| Linux          | amd64           | x86_64-linux-gnu-gcc                    | x86_64-linux-gnu-g++                    |           ✅           |
+| Linux          | arm64           | aarch64-linux-gnu-gcc                   | aarch64-linux-gnu-g++                   |           ✅           |
+| Linux          | armhf (GOARM=5) | arm-linux-gnueabihf-gcc                 | arm-linux-gnueabihf-g++                 | Verification required |
+| Linux          | armhf (GOARM=6) | arm-linux-gnueabihf-gcc                 | arm-linux-gnueabihf-g++                 | Verification required |
+| Linux          | armhf (GOARM=7) | arm-linux-gnueabihf-gcc                 | arm-linux-gnueabihf-g++                 |           ✅           |
+| Linux          | s390x           | s390x-linux-gnu-gcc                     | s390x-linux-gnu-g++                     |           ✅           |
+| Windows        | amd64           | x86_64-w64-mingw32-gcc                  | x86_64-w64-mingw32-g++                  |           ✅           |
+| Windows        | arm64           | /llvm-mingw/bin/aarch64-w64-mingw32-gcc | /llvm-mingw/bin/aarch64-w64-mingw32-g++ |           ✅           |
 
 ## Docker
 
@@ -76,13 +78,13 @@ To login from within `goreleaser-cross` container create creds file.
 
 ```json
 {
-  "registries": [
-    {
-      "user": "<username>",
-      "pass": "<password>",
-      "registry": "<registry url>" // for example ghcr.io
-    }
-  ]
+    "registries": [
+        {
+            "user": "<username>",
+            "pass": "<password>",
+            "registry": "<registry url>" // for example ghcr.io
+        }
+    ]
 }
 ```
 
