@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -xe
+set -e
 
 if [[ -z "$GPG_KEY" ]]; then
 	GPG_KEY=/secrets/key.gpg
