@@ -2,7 +2,7 @@ ARG COSIGN_VERSION
 ARG COSIGN_SHA256
 ARG TOOLCHAINS_VERSION
 
-FROM gcr.io/projectsigstore/cosign:v$COSIGN_VERSION@sha256:$COSIGN_SHA256 as cosign
+FROM ghcr.io/sigstore/cosign/cosign:v$COSIGN_VERSION@sha256:$COSIGN_SHA256 as cosign
 
 FROM ghcr.io/goreleaser/goreleaser-cross-toolchains:$TOOLCHAINS_VERSION
 
