@@ -6,70 +6,74 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
 function generate_interim_tags {
-	hub="goreleaser/$1"
-	ghcr=ghcr.io/$hub
+	local hub="goreleaser/$1"
+	local tag=$2
+	local tag_minor
+	local registries
 
-	tag=$(make tag)
-	GORELEASER_VERSION=v$GORELEASER_VERSION
+	# shellcheck disable=SC2206
+	registries=($3)
 
 	tag_minor=v$("${SCRIPT_DIR}/semver.sh" get major "$tag").$("${SCRIPT_DIR}/semver.sh" get minor "$tag")
 
-	if [[ $("${SCRIPT_DIR}"/is_prerelease.sh "$tag") == true ]]; then
-		echo "$hub:$tag"
-		echo "$ghcr:$tag"
-	else
-		echo "$hub:latest"
-		echo "$hub:$tag"
-		echo "$hub:$tag_minor"
-		echo "$ghcr:latest"
-		echo "$ghcr:$tag"
-		echo "$ghcr:$tag_minor"
-	fi
+	for registry in "${registries[@]}"; do
+		image=$hub
+		if [[ "$registry" != "docker.io" ]]; then
+			image=$registry/$image
+		fi
+
+		if [[ $("${SCRIPT_DIR}"/is_prerelease.sh "$tag") == true ]]; then
+			echo "$image:$tag"
+		else
+			echo "$image:$tag"
+			echo "$image:$tag_minor"
+			echo "$image:latest"
+		fi
+	done
 
 	exit 0
 }
 
 function generate_tags {
-	hub="goreleaser/$1"
-	ghcr=ghcr.io/$hub
+	local hub="goreleaser/$1"
+	local tag=$2
+	local GORELEASER_VERSION=v$GORELEASER_VERSION
+	local tag_minor
+	local registries
 
-	tag=$(make tag)
-	GORELEASER_VERSION=v$GORELEASER_VERSION
-
+	# shellcheck disable=SC2206
+	registries=($3)
 	tag_minor=v$("${SCRIPT_DIR}/semver.sh" get major "$tag").$("${SCRIPT_DIR}/semver.sh" get minor "$tag")
 
-	if [[ $("${SCRIPT_DIR}"/is_prerelease.sh "$tag") == true ]]; then
-		echo "$hub:$tag-$GORELEASER_VERSION"
-		echo "$hub:$tag.$GORELEASER_VERSION"
-		echo "$hub:$tag"
-		echo "$ghcr:$tag-$GORELEASER_VERSION"
-		echo "$ghcr:$tag.$GORELEASER_VERSION"
-		echo "$ghcr:$tag"
-	else
-		echo "$hub:latest"
-		echo "$hub:$tag.$GORELEASER_VERSION"
-		echo "$hub:$tag-$GORELEASER_VERSION"
-		echo "$hub:$tag_minor.$GORELEASER_VERSION"
-		echo "$hub:$tag_minor-$GORELEASER_VERSION"
-		echo "$hub:$tag_minor"
-		echo "$hub:$tag"
-		echo "$ghcr:latest"
-		echo "$ghcr:$tag.$GORELEASER_VERSION"
-		echo "$ghcr:$tag-$GORELEASER_VERSION"
-		echo "$ghcr:$tag_minor.$GORELEASER_VERSION"
-		echo "$ghcr:$tag_minor-$GORELEASER_VERSION"
-		echo "$ghcr:$tag_minor"
-		echo "$ghcr:$tag"
-	fi
+	for registry in "${registries[@]}"; do
+		image=$hub
+		if [[ "$registry" != "docker.io" ]]; then
+			image=$registry/$image
+		fi
+
+		if [[ $("${SCRIPT_DIR}"/is_prerelease.sh "$tag") == true ]]; then
+			echo "$image:$tag-$GORELEASER_VERSION"
+			echo "$image:$tag.$GORELEASER_VERSION"
+			echo "$image:$tag"
+		else
+			echo "$image:$tag.$GORELEASER_VERSION"
+			echo "$image:$tag-$GORELEASER_VERSION"
+			echo "$image:$tag_minor.$GORELEASER_VERSION"
+			echo "$image:$tag_minor-$GORELEASER_VERSION"
+			echo "$image:$tag_minor"
+			echo "$image:$tag"
+			echo "$image:latest"
+		fi
+	done
 
 	exit 0
 }
 
 case $1 in
 	cross-base)
-		generate_interim_tags "goreleaser-$1"
+		generate_interim_tags "goreleaser-$1" "$2" "$3"
 		;;
 	cross|cross-pro)
-		generate_tags "goreleaser-$1"
+		generate_tags "goreleaser-$1" "$2" "$3"
 		;;
 esac
