@@ -1,0 +1,4 @@
+conventional-commits: true
+debug: false
+owner: "goreleaser"
+package-name: "goreleaser-cross"
