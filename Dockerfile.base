@@ -1,10 +1,6 @@
-ARG COSIGN_VERSION
-ARG COSIGN_SHA256
-ARG TOOLCHAINS_VERSION
+ARG TOOLCHAINS_TAG=v0.1.8
 
-FROM ghcr.io/sigstore/cosign/cosign:v$COSIGN_VERSION@sha256:$COSIGN_SHA256 as cosign
-
-FROM ghcr.io/goreleaser/goreleaser-cross-toolchains:$TOOLCHAINS_VERSION
+FROM ghcr.io/goreleaser/goreleaser-cross-toolchains:${TOOLCHAINS_TAG}
 
 LABEL maintainer="Artur Troian <troian dot ap at gmail dot com>"
 LABEL "org.opencontainers.image.source"="https://github.com/goreleaser/goreleaser-cross-base"
@@ -13,6 +9,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG TINI_VERSION
 ARG GO_VERSION
 ARG TARGETARCH
+ARG COSIGN_VERSION
 
 COPY entrypoint.sh /
 
@@ -40,9 +37,11 @@ RUN \
  && wget https://go.dev/dl/go${GO_VERSION}.linux-${TARGETARCH}.tar.gz \
  && rm -rf /usr/local/go && tar -C /usr/local -xzf go${GO_VERSION}.linux-${TARGETARCH}.tar.gz \
  && rm go${GO_VERSION}.linux-${TARGETARCH}.tar.gz \
+ && wget https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign_${COSIGN_VERSION}_${TARGETARCH}.deb \
+ && dpkg -i cosign_${COSIGN_VERSION}_${TARGETARCH}.deb \
+ && rm cosign_${COSIGN_VERSION}_${TARGETARCH}.deb \
  && chmod +x /entrypoint.sh
 
-COPY --from=cosign /ko-app/cosign /usr/local/bin/cosign
 COPY --from=docker/buildx-bin:latest /buildx /usr/libexec/docker/cli-plugins/docker-buildx
 
 ENV OSX_CROSS_PATH=/usr/local/osxcross

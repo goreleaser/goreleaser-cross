@@ -1,0 +1,13 @@
+---
+name: dispatch
+jobs:
+  runs-on: ubuntu-latest
+  steps:
+    - name: notify goreleaser-cross with new release
+      if: success() && startsWith(github.ref, 'refs/tags/v')
+      uses: peter-evans/repository-dispatch@v2
+      with:
+        token: ${{ secrets.GH_PAT }}
+        repository: goreleaser/goreleaser-cross
+        event-type: goreleaser
+        client-payload: '{"tag": "${{ env.RELEASE_TAG }}"}'

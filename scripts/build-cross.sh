@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 
-set -e
+set -ex
 
 arch=$1
-image=$2
+images=$2
 buildargs=$3
 
 # shellcheck disable=SC2016
 dockerfile=$(sed 's/goreleaser-cross-base:.*/goreleaser-cross-base:\$TAG_VERSION-\$TARGETARCH/' < Dockerfile)
 
-docker build --platform=linux/"${arch}" -t "${image}" \
+# shellcheck disable=SC2086
+docker build --platform=linux/"${arch}" $images \
 $buildargs \
 . -f- <<EOF
 $dockerfile
