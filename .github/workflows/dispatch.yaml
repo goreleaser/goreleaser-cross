@@ -1,6 +1,7 @@
 ---
 name: dispatch
 jobs:
+  name: dispatch
   runs-on: ubuntu-latest
   steps:
     - name: notify goreleaser-cross with new release
