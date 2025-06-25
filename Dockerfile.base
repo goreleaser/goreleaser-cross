@@ -37,7 +37,7 @@ RUN \
  && wget https://go.dev/dl/go${GO_VERSION}.linux-${TARGETARCH}.tar.gz \
  && rm -rf /usr/local/go && tar -C /usr/local -xzf go${GO_VERSION}.linux-${TARGETARCH}.tar.gz \
  && rm go${GO_VERSION}.linux-${TARGETARCH}.tar.gz \
- && wget https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign_${COSIGN_VERSION}_${TARGETARCH}.deb \
+ && wget https://github.com/sigstore/cosign/releases/download/v${COSIGN_VERSION}}/cosign_${COSIGN_VERSION}_${TARGETARCH}.deb \
  && dpkg -i cosign_${COSIGN_VERSION}_${TARGETARCH}.deb \
  && rm cosign_${COSIGN_VERSION}_${TARGETARCH}.deb \
  && chmod +x /entrypoint.sh
