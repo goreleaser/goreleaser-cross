@@ -1,0 +1,6 @@
+Types: deb
+Architectures: arm64,amd64
+URIs: https://download.docker.com/linux/ubuntu
+Suites: noble
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.gpg

@@ -52,7 +52,7 @@ base-%:
 		--build-arg TINI_VERSION=$(TINI_VERSION) \
 		--build-arg COSIGN_VERSION=$(COSIGN_VERSION) \
 		--build-arg DEBIAN_FRONTEND=$(DEBIAN_FRONTEND) \
-		--build-arg TOOLCHAINS_TAG="$(TOOLCHAINS_VERSION)-$*" \
+		--build-arg TOOLCHAINS_TAG="$(TOOLCHAINS_VERSION)" \
 		. -f Dockerfile.base
 
 .PHONY: goreleaser-%
