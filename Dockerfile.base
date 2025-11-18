@@ -34,6 +34,7 @@ RUN \
         docker-ce \
         docker-ce-cli \
         tini \
+        pkg-config \
  && apt -y autoremove \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
