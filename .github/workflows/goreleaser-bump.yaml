@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -22,7 +22,7 @@ jobs:
           git config --global user.name github-actions
           git config --global user.email "github-actions@github.com"
       - name: Setup env
-        uses: c-py/action-dotenv-to-setenv@v3
+        uses: c-py/action-dotenv-to-setenv@v5
         with:
           env-file: .env
       - name: Goreleaser version
@@ -44,11 +44,11 @@ jobs:
       - goreleaser-bump
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Setup env
-        uses: c-py/action-dotenv-to-setenv@v3
+        uses: c-py/action-dotenv-to-setenv@v5
         with:
           env-file: .env
       - name: Get version
@@ -65,11 +65,11 @@ jobs:
       - goreleaser-bump
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Setup env
-        uses: c-py/action-dotenv-to-setenv@v3
+        uses: c-py/action-dotenv-to-setenv@v5
         with:
           env-file: .env
       - name: Get version
