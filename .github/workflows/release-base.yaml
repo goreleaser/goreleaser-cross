@@ -28,10 +28,10 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: git fetch --prune --unshallow
       - name: Setup env
-        uses: c-py/action-dotenv-to-setenv@v3
+        uses: c-py/action-dotenv-to-setenv@v5
         with:
           env-file: .env
       - name: Define and set tags
@@ -76,13 +76,13 @@ jobs:
           sudo docker image prune --all --force
           sudo docker builder prune -a
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - run: git fetch --prune --unshallow
       - name: Setup env
-        uses: c-py/action-dotenv-to-setenv@v3
+        uses: c-py/action-dotenv-to-setenv@v5
         with:
           env-file: .env
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v6
         with:
           go-version: "${{ env.GO_VERSION }}"
       - name: get version
@@ -98,7 +98,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           body_path: changelog.md
   #      - name: Sign images
@@ -130,7 +130,7 @@ jobs:
       - release-base
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - run: git fetch --prune --unshallow
       - name: get version
         run: echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
@@ -145,7 +145,7 @@ jobs:
       - release-base
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - run: git fetch --prune --unshallow
       - name: get version
         run: echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV

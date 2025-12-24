@@ -29,10 +29,10 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - run: git fetch --prune --unshallow
       - name: Setup env
-        uses: c-py/action-dotenv-to-setenv@v3
+        uses: c-py/action-dotenv-to-setenv@v5
         with:
           env-file: .env
       - name: get version
@@ -48,7 +48,7 @@ jobs:
           echo "$cross_pro_tags" >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
       - name: Set docker push behavior
-        uses: tj-actions/branch-names@v6
+        uses: tj-actions/branch-names@v9
         id: branch-name
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -56,7 +56,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
       - name: Install cosign
         uses: sigstore/cosign-installer@main
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v6
         with:
           go-version: "${{ env.GO_VERSION }}"
       - name: Build and push goreleaser pro image

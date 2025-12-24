@@ -6,7 +6,7 @@ jobs:
   steps:
     - name: notify goreleaser-cross with new release
       if: success() && startsWith(github.ref, 'refs/tags/v')
-      uses: peter-evans/repository-dispatch@v2
+      uses: peter-evans/repository-dispatch@v4
       with:
         token: ${{ secrets.GH_PAT }}
         repository: goreleaser/goreleaser-cross
