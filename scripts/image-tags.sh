@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 # in akash even minor part of the tag indicates release belongs to the MAINNET
 # using it as scripts simplifies debugging as well as portability
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
