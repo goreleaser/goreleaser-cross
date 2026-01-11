@@ -1,11 +1,5 @@
+---
 version: 2
-
-env:
-  - GO_VERSION=1.25.5
-  - TOOLCHAINS_VERSION=v0.2.0
-  - GORELEASER_VERSION=2.13.2
-  - TINI_VERSION=v0.19.0
-  - COSIGN_VERSION=2.5.3
 
 builds:
   - skip: true
@@ -19,6 +13,7 @@ dockers_v2:
       - "ghcr.io/goreleaser/goreleaser-cross-base"
     tags:
       - "{{ .Tag }}"
+      - "v{{ .Major }}.{{ .Minor }}"
       - "latest"
     dockerfile: Dockerfile.base
     platforms:
@@ -32,13 +27,15 @@ dockers_v2:
       TINI_VERSION: "{{ .Env.TINI_VERSION }}"
       COSIGN_VERSION: "{{ .Env.COSIGN_VERSION }}"
       TOOLCHAINS_TAG: "{{ .Env.TOOLCHAINS_VERSION }}"
-
   - id: goreleaser
     images:
       - "goreleaser/goreleaser-cross"
       - "ghcr.io/goreleaser/goreleaser-cross"
     tags:
       - "{{ .Tag }}"
+      - "v{{ .Major }}.{{ .Minor }}"
+      - "{{ .Tag }}-v{{ .Env.GORELEASER_VERSION }}"
+      - "v{{ .Major }}.{{ .Minor }}-v{{ .Env.GORELEASER_VERSION }}"
       - "latest"
     dockerfile: Dockerfile
     platforms:
@@ -54,6 +51,9 @@ dockers_v2:
       - "ghcr.io/goreleaser/goreleaser-cross-pro"
     tags:
       - "{{ .Tag }}"
+      - "v{{ .Major }}.{{ .Minor }}"
+      - "{{ .Tag }}-v{{ .Env.GORELEASER_VERSION }}"
+      - "v{{ .Major }}.{{ .Minor }}-v{{ .Env.GORELEASER_VERSION }}"
       - "latest"
     dockerfile: Dockerfile
     platforms:

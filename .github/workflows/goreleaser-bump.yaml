@@ -28,11 +28,11 @@ jobs:
 
       - name: Update version in .goreleaser.yaml
         run: |
-          sed -i -e "s/GORELEASER_VERSION=.*/GORELEASER_VERSION=${{ github.event.inputs.tag }}/g" .goreleaser.yaml
+          sed -i -e "s/GORELEASER_VERSION=.*/GORELEASER_VERSION=${{ github.event.inputs.tag }}/g" .env
 
       - name: Commit new version
         run: |
-          if git add .goreleaser.yaml > /dev/null 2>&1; then
+          if git add .env > /dev/null 2>&1; then
             git commit -m "feat: bump goreleaser to v${{ github.event.inputs.tag }}"
             git push origin master
           fi
