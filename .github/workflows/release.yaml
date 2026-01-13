@@ -18,6 +18,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: c-py/action-dotenv-to-setenv@v5
+        with:
+          env-file: .env
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
