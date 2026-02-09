@@ -64,6 +64,14 @@ dockers_v2:
       GORELEASER_VERSION: "{{ .Env.GORELEASER_VERSION }}"
       GORELEASER_DISTRIBUTION: "-pro"
 
+docker_signs:
+  - cmd: cosign
+    output: true
+    args:
+      - "sign"
+      - "${artifact}"
+      - "--yes"
+
 changelog:
   use: github
   sort: asc
