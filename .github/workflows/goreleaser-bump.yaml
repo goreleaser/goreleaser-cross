@@ -33,6 +33,6 @@ jobs:
       - name: Commit new version
         run: |
           if git add .env > /dev/null 2>&1; then
-            git commit -m "feat: bump goreleaser to v${{ github.event.inputs.tag }}"
+            git commit -m "feat: bump goreleaser to ${{ github.event.inputs.tag }}"
             git push origin master
           fi
