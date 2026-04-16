@@ -66,10 +66,22 @@ dockers_v2:
 
 docker_signs:
   - cmd: cosign
+    id: cosign/local
+    if: '{{ eq .Env.COSIGN_MODE "local" }}'
     output: true
     args:
       - "sign"
-      - "${artifact}"
+      - "--key"
+      - "cosign.key"
+      - "${artifact}@${digest}"
+      - "--yes"
+  - cmd: cosign
+    id: cosign/ci
+    if: '{{ ne .Env.COSIGN_MODE "local" }}'
+    output: true
+    args:
+      - "sign"
+      - "${artifact}@${digest}"
       - "--yes"
 
 changelog:
