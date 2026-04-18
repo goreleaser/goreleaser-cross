@@ -68,7 +68,7 @@ dockers_v2:
 docker_signs:
   - cmd: cosign
     id: cosign/local
-    if: '{{ eq .Env.COSIGN_MODE "local" }}'
+    if: '{{ eq (envOrDefault "COSIGN_MODE" "") "local" }}'
     output: true
     args:
       - "sign"
@@ -78,7 +78,7 @@ docker_signs:
       - "--yes"
   - cmd: cosign
     id: cosign/ci
-    if: '{{ ne .Env.COSIGN_MODE "local" }}'
+    if: '{{ ne (envOrDefault "COSIGN_MODE" "") "local" }}'
     output: true
     args:
       - "sign"
