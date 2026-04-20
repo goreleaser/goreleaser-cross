@@ -35,7 +35,7 @@ dockers_v2:
     tags:
       - "{{ .Tag }}"
       - "v{{ .Major }}.{{ .Minor }}"
-      - "{{ .Tag }}-v{{ .Env.GORELEASER_VERSION }}"
+      - "{{ .Tag }}-{{ .Env.GORELEASER_VERSION }}"
       - "v{{ .Major }}.{{ .Minor }}-{{ .Env.GORELEASER_VERSION }}"
       - "latest"
     dockerfile: Dockerfile
@@ -53,7 +53,7 @@ dockers_v2:
     tags:
       - "{{ .Tag }}"
       - "v{{ .Major }}.{{ .Minor }}"
-      - "{{ .Tag }}-v{{ .Env.GORELEASER_VERSION }}"
+      - "{{ .Tag }}-{{ .Env.GORELEASER_VERSION }}"
       - "v{{ .Major }}.{{ .Minor }}-{{ .Env.GORELEASER_VERSION }}"
       - "latest"
     dockerfile: Dockerfile
