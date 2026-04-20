@@ -17,22 +17,16 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-          persist-credentials: true
-
-      - run: git checkout master
-
-      - name: Setup git config
-        run: |
-          git config --global user.name github-actions
-          git config --global user.email "github-actions@github.com"
 
       - name: Update version in .goreleaser.yaml
         run: |
           sed -i -e "s/GORELEASER_VERSION=.*/GORELEASER_VERSION=${{ github.event.inputs.tag }}/g" .env
 
       - name: Commit new version
-        run: |
-          if git add .env > /dev/null 2>&1; then
-            git commit -m "feat: bump goreleaser to ${{ github.event.inputs.tag }}"
-            git push origin master
-          fi
+        uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7.1.0
+        with:
+          commit_message: "feat: bump goreleaser to ${{ github.event.inputs.tag }}"
+          branch: main
+          commit_user_name: actions-user
+          commit_user_email: actions@github.com
+          commit_author: actions-user <actions@github.com>
