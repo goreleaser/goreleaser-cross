@@ -26,7 +26,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7.1.0
         with:
           commit_message: "feat: bump goreleaser to ${{ github.event.inputs.tag }}"
-          branch: main
+          branch: master
           commit_user_name: actions-user
           commit_user_email: actions@github.com
           commit_author: actions-user <actions@github.com>
