@@ -24,6 +24,7 @@ RUN \
  && apt-get update \
  && apt-get install --no-install-recommends -y -q \
     software-properties-common \
+    ca-certificates \
     curl \
     gnupg2 \
     openssh-client \
